@@ -31,5 +31,5 @@ build/
 *.log
 
 # Heavy Data & RAG Files
-motor_vehicles*
+# motor_vehicles* (Uncommented to allow FAISS and metadata files on Render)
 Procfile
