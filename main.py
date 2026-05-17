@@ -108,12 +108,11 @@ class APIResources:
         self.executor = ThreadPoolExecutor(max_workers=10)
 
     async def load_all(self):
-        """Eagerly load all heavy resources."""
+        """Eagerly load all fast resources (FAISS, Metadata). Load model lazily to allow instant port binding."""
         loop = asyncio.get_event_loop()
         tasks = [
             loop.run_in_executor(self.executor, self._load_index),
-            loop.run_in_executor(self.executor, self._load_metadata),
-            loop.run_in_executor(self.executor, self._load_model)
+            loop.run_in_executor(self.executor, self._load_metadata)
         ]
         await asyncio.gather(*tasks)
 
