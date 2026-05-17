@@ -213,17 +213,24 @@ def apply_styling():
 @st.cache_resource(show_spinner=False)
 def load_rag_resources():
     from config import GROQ_API_KEY as _KEY
+    import os
     try:
-        # Suppress technical noise on frontend
+        # Check if files exist before loading
+        if not os.path.exists('motor_vehicles.faiss') or not os.path.exists('motor_vehicles_metadata.pkl'):
+            logger.error("RAG resource files missing!")
+            return None, None, None, Groq(api_key=_KEY)
+
         index = faiss.read_index('motor_vehicles.faiss')
         with open('motor_vehicles_metadata.pkl', 'rb') as f:
             metadata = pickle.load(f)
+        
+        # This is a large model, cache it
         model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
         client = Groq(api_key=_KEY)
+        logger.info("✅ RAG resources loaded successfully.")
         return index, metadata, model, client
     except Exception as e:
-        # Log to terminal instead of warning the user
-        print(f"DEBUG: RAG init issue: {e}")
+        logger.error(f"❌ RAG init issue: {e}")
         return None, None, None, Groq(api_key=_KEY)
 
 # --- Authentication Logic ---
@@ -768,6 +775,13 @@ def profile_module():
 # --- Main App Logic ---
 
 def main():
+    # Initialize database tables on startup
+    try:
+        init_db()
+    except Exception as e:
+        st.error(f"Critical: Database connection failed. {e}")
+        return
+
     apply_styling()
     
     if not auth_module():

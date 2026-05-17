@@ -14,6 +14,11 @@ class RegisterRequest(BaseModel):
     gender: Optional[str] = None
     dob: Optional[str] = None # Expecting ISO format or YYYY-MM-DD
 
+class ResetPasswordRequest(BaseModel):
+    email: str
+    username: str
+    new_password: str
+
 class AuthResponse(BaseModel):
     success: bool
     message: str
